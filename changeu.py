@@ -53,15 +53,13 @@ class BurpExtender(IBurpExtender, IHttpListener):
 
                 body = response[analyzedResponse.getBodyOffset():]
                 body_string = body.tostring()
-                # print body_string
-                u_char_escape = re.search( r'(?:\\u[\d\w]{4})+', body_string)
-                if u_char_escape:
-                    # print u_char_escape.group()
-                    u_char = u_char_escape.group().decode('unicode_escape').encode('utf8')
-                    new_body_string = body_string.replace(u_char_escape.group(),'--u--'+u_char+'--u--')
-                    new_body = self._helpers.bytesToString(new_body_string)
-                    # print new_body_string
-                    messageInfo.setResponse(self._helpers.buildHttpMessage(new_headers, new_body))
+                new_body = body_string
+                if u_char_escapes:
+                    for u_char_escape in u_char_escapes:
+                        u_char = u_char_escape.decode('unicode_escape').encode('utf8')
+                        new_body_string = new_body.replace(u_char_escape,u_char)
+                        new_body = self._helpers.bytesToString(new_body_string)
+                messageInfo.setResponse(self._helpers.buildHttpMessage(new_headers, new_body))
 
                 
     
